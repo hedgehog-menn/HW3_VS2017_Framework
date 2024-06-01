@@ -2,13 +2,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include<math.h>
+#include <math.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "textfile.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <STB/stb_image.h>
-
 
 #include "Vectors.h"
 #include "Matrices.h"
@@ -16,8 +15,8 @@
 #include "tiny_obj_loader.h"
 
 #ifndef max
-# define max(a,b) (((a)>(b))?(a):(b))
-# define min(a,b) (((a)<(b))?(a):(b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 using namespace std;
@@ -42,13 +41,14 @@ enum TransMode
 	ViewUp = 5,
 };
 
-
 vector<string> filenames; // .obj filename list
 
-typedef struct _Offset {
+typedef struct _Offset
+{
 	GLfloat x;
 	GLfloat y;
-	struct _Offset(GLfloat _x, GLfloat _y) {
+	struct _Offset(GLfloat _x, GLfloat _y)
+	{
 		x = _x;
 		y = _y;
 	};
@@ -62,7 +62,7 @@ typedef struct
 
 	GLuint diffuseTexture;
 
-	// eye texture coordinate 
+	// eye texture coordinate
 	GLuint isEye;
 	vector<Offset> offsets;
 
@@ -86,7 +86,7 @@ struct model
 {
 	Vector3 position = Vector3(0, 0, 0);
 	Vector3 scale = Vector3(1, 1, 1);
-	Vector3 rotation = Vector3(0, 0, 0);	// Euler form
+	Vector3 rotation = Vector3(0, 0, 0); // Euler form
 
 	vector<Shape> shapes;
 
@@ -127,10 +127,9 @@ Matrix4 project_matrix;
 Shape m_shpae;
 
 int cur_idx = 0; // represent which model should be rendered now
-vector<string> model_list{ "../TextureModels/Fushigidane.obj", "../TextureModels/Mew.obj","../TextureModels/Nyarth.obj","../TextureModels/Zenigame.obj", "../TextureModels/laurana500.obj", "../TextureModels/Nala.obj", "../TextureModels/Square.obj" };
+vector<string> model_list{"../TextureModels/Fushigidane.obj", "../TextureModels/Mew.obj", "../TextureModels/Nyarth.obj", "../TextureModels/Zenigame.obj", "../TextureModels/laurana500.obj", "../TextureModels/Nala.obj", "../TextureModels/Square.obj"};
 
 GLuint program;
-
 
 // uniforms location
 GLuint iLocP;
@@ -163,8 +162,7 @@ Matrix4 translate(Vector3 vec)
 		1.0f, 0.0f, 0.0f, vec.x,
 		0.0f, 1.0f, 0.0f, vec.y,
 		0.0f, 0.0f, 1.0f, vec.z,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+		0.0f, 0.0f, 0.0f, 1.0f);
 
 	return mat;
 }
@@ -177,8 +175,7 @@ Matrix4 scaling(Vector3 vec)
 		vec.x, 0.0f, 0.0f, 0.0f,
 		0.0f, vec.y, 0.0f, 0.0f,
 		0.0f, 0.0f, vec.z, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+		0.0f, 0.0f, 0.0f, 1.0f);
 
 	return mat;
 }
@@ -191,8 +188,7 @@ Matrix4 rotateX(GLfloat val)
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, cosf(val), -sinf(val), 0.0f,
 		0.0f, sinf(val), cosf(val), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+		0.0f, 0.0f, 0.0f, 1.0f);
 
 	return mat;
 }
@@ -205,8 +201,7 @@ Matrix4 rotateY(GLfloat val)
 		cosf(val), 0.0f, sinf(val), 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		-sinf(val), 0.0f, cosf(val), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+		0.0f, 0.0f, 0.0f, 1.0f);
 
 	return mat;
 }
@@ -219,21 +214,20 @@ Matrix4 rotateZ(GLfloat val)
 		cosf(val), -sinf(val), 0.0f, 0.0f,
 		sinf(val), cosf(val), 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	);
+		0.0f, 0.0f, 0.0f, 1.0f);
 
 	return mat;
 }
 
 Matrix4 rotate(Vector3 vec)
 {
-	return rotateX(vec.x)*rotateY(vec.y)*rotateZ(vec.z);
+	return rotateX(vec.x) * rotateY(vec.y) * rotateZ(vec.z);
 }
 
 void setViewingMatrix()
 {
-	float F[3] = { main_camera.position.x - main_camera.center.x, main_camera.position.y - main_camera.center.y, main_camera.position.z - main_camera.center.z };
-	float U[3] = { main_camera.up_vector.x, main_camera.up_vector.y, main_camera.up_vector.z };
+	float F[3] = {main_camera.position.x - main_camera.center.x, main_camera.position.y - main_camera.center.y, main_camera.position.z - main_camera.center.z};
+	float U[3] = {main_camera.up_vector.x, main_camera.up_vector.y, main_camera.up_vector.z};
 	float R[3];
 	Normalize(F);
 	Cross(U, F, R);
@@ -288,7 +282,7 @@ void setOrthogonal()
 void setPerspective()
 {
 	const float tanHalfFOV = tanf((proj.fovy / 2.0) / 180.0 * acosf(-1.0));
-	
+
 	cur_proj_mode = Perspective;
 	project_matrix[0] = 1.0f / (tanHalfFOV * proj.aspect);
 	project_matrix[1] = 0;
@@ -309,11 +303,12 @@ void setPerspective()
 }
 
 // Call back function for window reshape
-void ChangeSize(GLFWwindow* window, int width, int height)
+void ChangeSize(GLFWwindow *window, int width, int height)
 {
 	// glViewport(0, 0, width, height);
 	proj.aspect = (float)(width / 2) / (float)height;
-	if (cur_proj_mode == Perspective) {
+	if (cur_proj_mode == Perspective)
+	{
 		setPerspective();
 	}
 
@@ -330,7 +325,8 @@ void Vector3ToFloat4(Vector3 v, GLfloat res[4])
 }
 
 // Render function for display rendering
-void RenderScene(int per_vertex_or_per_pixel) {	
+void RenderScene(int per_vertex_or_per_pixel)
+{
 	Vector3 modelPos = models[cur_idx].position;
 
 	Matrix4 T, R, S;
@@ -344,7 +340,7 @@ void RenderScene(int per_vertex_or_per_pixel) {
 	glUniformMatrix4fv(iLocV, 1, GL_FALSE, view_matrix.getTranspose());
 	glUniformMatrix4fv(iLocP, 1, GL_FALSE, project_matrix.getTranspose());
 
-	for (int i = 0; i < models[cur_idx].shapes.size(); i++) 
+	for (int i = 0; i < models[cur_idx].shapes.size(); i++)
 	{
 		glBindVertexArray(models[cur_idx].shapes[i].vao);
 
@@ -356,9 +352,10 @@ void RenderScene(int per_vertex_or_per_pixel) {
 }
 
 // Call back function for keyboard
-void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (action == GLFW_PRESS) {
+	if (action == GLFW_PRESS)
+	{
 		switch (key)
 		{
 		case GLFW_KEY_ESCAPE:
@@ -413,7 +410,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	// scroll up positive, otherwise it would be negtive
 	switch (cur_trans_mode)
@@ -445,26 +442,29 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		mouse_pressed = true;
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	{
 		mouse_pressed = false;
 		starting_press_x = -1;
 		starting_press_y = -1;
 	}
-		
 }
 
-static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
+static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
-	if (mouse_pressed) {
-		if (starting_press_x < 0 || starting_press_y < 0) {
+	if (mouse_pressed)
+	{
+		if (starting_press_x < 0 || starting_press_y < 0)
+		{
 			starting_press_x = (int)xpos;
 			starting_press_y = (int)ypos;
 		}
-		else {
+		else
+		{
 			float diff_x = starting_press_x - (int)xpos;
 			float diff_y = starting_press_y - (int)ypos;
 			starting_press_x = (int)xpos;
@@ -498,8 +498,8 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 				models[cur_idx].scale.y += diff_y * 0.001;
 				break;
 			case GeoRotation:
-				models[cur_idx].rotation.x += acosf(-1.0f) / 180.0*diff_y*(45.0 / 400.0);
-				models[cur_idx].rotation.y += acosf(-1.0f) / 180.0*diff_x*(45.0 / 400.0);
+				models[cur_idx].rotation.x += acosf(-1.0f) / 180.0 * diff_y * (45.0 / 400.0);
+				models[cur_idx].rotation.y += acosf(-1.0f) / 180.0 * diff_x * (45.0 / 400.0);
 				break;
 			}
 		}
@@ -518,8 +518,8 @@ void setShaders()
 	vs = textFileRead("shader.vs.glsl");
 	fs = textFileRead("shader.fs.glsl");
 
-	glShaderSource(v, 1, (const GLchar**)&vs, NULL);
-	glShaderSource(f, 1, (const GLchar**)&fs, NULL);
+	glShaderSource(v, 1, (const GLchar **)&vs, NULL);
+	glShaderSource(f, 1, (const GLchar **)&fs, NULL);
 
 	free(vs);
 	free(fs);
@@ -533,7 +533,8 @@ void setShaders()
 	if (!success)
 	{
 		glGetShaderInfoLog(v, 1000, NULL, infoLog);
-		std::cout << "ERROR: VERTEX SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR: VERTEX SHADER COMPILATION FAILED\n"
+				  << infoLog << std::endl;
 	}
 
 	// compile fragment shader
@@ -543,23 +544,26 @@ void setShaders()
 	if (!success)
 	{
 		glGetShaderInfoLog(f, 1000, NULL, infoLog);
-		std::cout << "ERROR: FRAGMENT SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR: FRAGMENT SHADER COMPILATION FAILED\n"
+				  << infoLog << std::endl;
 	}
 
 	// create program object
 	p = glCreateProgram();
 
 	// attach shaders to program object
-	glAttachShader(p,f);
-	glAttachShader(p,v);
+	glAttachShader(p, f);
+	glAttachShader(p, v);
 
 	// link program
 	glLinkProgram(p);
 	// check for linking errors
 	glGetProgramiv(p, GL_LINK_STATUS, &success);
-	if (!success) {
+	if (!success)
+	{
 		glGetProgramInfoLog(p, 1000, NULL, infoLog);
-		std::cout << "ERROR: SHADER PROGRAM LINKING FAILED\n" << infoLog << std::endl;
+		std::cout << "ERROR: SHADER PROGRAM LINKING FAILED\n"
+				  << infoLog << std::endl;
 	}
 
 	glDeleteShader(v);
@@ -567,16 +571,16 @@ void setShaders()
 
 	if (success)
 		glUseProgram(p);
-    else
-    {
-        system("pause");
-        exit(123);
-    }
+	else
+	{
+		system("pause");
+		exit(123);
+	}
 
 	program = p;
 }
 
-void normalization(tinyobj::attrib_t* attrib, vector<GLfloat>& vertices, vector<GLfloat>& colors, vector<GLfloat>& normals, vector<GLfloat>& textureCoords, vector<int>& material_id, tinyobj::shape_t* shape)
+void normalization(tinyobj::attrib_t *attrib, vector<GLfloat> &vertices, vector<GLfloat> &colors, vector<GLfloat> &normals, vector<GLfloat> &textureCoords, vector<int> &material_id, tinyobj::shape_t *shape)
 {
 	vector<float> xVector, yVector, zVector;
 	float minX = 10000, maxX = -10000, minY = 10000, maxY = -10000, minZ = 10000, maxZ = -10000;
@@ -584,7 +588,7 @@ void normalization(tinyobj::attrib_t* attrib, vector<GLfloat>& vertices, vector<
 	// find out min and max value of X, Y and Z axis
 	for (int i = 0; i < attrib->vertices.size(); i++)
 	{
-		//maxs = max(maxs, attrib->vertices.at(i));
+		// maxs = max(maxs, attrib->vertices.at(i));
 		if (i % 3 == 0)
 		{
 
@@ -629,7 +633,7 @@ void normalization(tinyobj::attrib_t* attrib, vector<GLfloat>& vertices, vector<
 			}
 		}
 	}
-	
+
 	float offsetX = (maxX + minX) / 2;
 	float offsetY = (maxY + minY) / 2;
 	float offsetZ = (maxZ + minZ) / 2;
@@ -668,15 +672,17 @@ void normalization(tinyobj::attrib_t* attrib, vector<GLfloat>& vertices, vector<
 
 	for (int i = 0; i < attrib->vertices.size(); i++)
 	{
-		//std::cout << i << " = " << (double)(attrib.vertices.at(i) / greatestAxis) << std::endl;
-		attrib->vertices.at(i) = attrib->vertices.at(i)/ scale;
+		// std::cout << i << " = " << (double)(attrib.vertices.at(i) / greatestAxis) << std::endl;
+		attrib->vertices.at(i) = attrib->vertices.at(i) / scale;
 	}
 	size_t index_offset = 0;
-	for (size_t f = 0; f < shape->mesh.num_face_vertices.size(); f++) {
+	for (size_t f = 0; f < shape->mesh.num_face_vertices.size(); f++)
+	{
 		int fv = shape->mesh.num_face_vertices[f];
 
 		// Loop over vertices in the face.
-		for (size_t v = 0; v < fv; v++) {
+		for (size_t v = 0; v < fv; v++)
+		{
 			// access to vertex
 			tinyobj::index_t idx = shape->mesh.indices[index_offset + v];
 			vertices.push_back(attrib->vertices[3 * idx.vertex_index + 0]);
@@ -700,7 +706,8 @@ void normalization(tinyobj::attrib_t* attrib, vector<GLfloat>& vertices, vector<
 	}
 }
 
-static string GetBaseDir(const string& filepath) {
+static string GetBaseDir(const string &filepath)
+{
 	if (filepath.find_last_of("/\\") != std::string::npos)
 		return filepath.substr(0, filepath.find_last_of("/\\"));
 	return "";
@@ -730,13 +737,13 @@ GLuint LoadTextureImage(string image_path)
 	}
 }
 
-vector<Shape> SplitShapeByMaterial(vector<GLfloat>& vertices, vector<GLfloat>& colors, vector<GLfloat>& normals, vector<GLfloat>& textureCoords, vector<int>& material_id, vector<PhongMaterial>& materials)
+vector<Shape> SplitShapeByMaterial(vector<GLfloat> &vertices, vector<GLfloat> &colors, vector<GLfloat> &normals, vector<GLfloat> &textureCoords, vector<int> &material_id, vector<PhongMaterial> &materials)
 {
 	vector<Shape> res;
 	for (int m = 0; m < materials.size(); m++)
 	{
 		vector<GLfloat> m_vertices, m_colors, m_normals, m_textureCoords;
-		for (int v = 0; v < material_id.size(); v++) 
+		for (int v = 0; v < material_id.size(); v++)
 		{
 			// extract all vertices with same material id and create a new shape for it.
 			if (material_id[v] == m)
@@ -822,15 +829,18 @@ void LoadTexturedModels(string model_path)
 
 	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, model_path.c_str(), base_dir.c_str());
 
-	if (!warn.empty()) {
+	if (!warn.empty())
+	{
 		cout << warn << std::endl;
 	}
 
-	if (!err.empty()) {
+	if (!err.empty())
+	{
 		cerr << err << std::endl;
 	}
 
-	if (!ret) {
+	if (!ret)
+	{
 		exit(1);
 	}
 
@@ -850,12 +860,11 @@ void LoadTexturedModels(string model_path)
 		{
 			cout << "LoadTexturedModels: Fail to load model's material " << i << endl;
 			system("pause");
-			
 		}
-		
+
 		allMaterial.push_back(material);
 	}
-	
+
 	for (int i = 0; i < shapes.size(); i++)
 	{
 		vertices.clear();
@@ -894,7 +903,7 @@ void initParameter()
 	main_camera.up_vector = Vector3(0.0f, 1.0f, 0.0f);
 
 	setViewingMatrix();
-	setPerspective();	//set default projection matrix as perspective matrix
+	setPerspective(); // set default projection matrix as perspective matrix
 }
 
 void setUniformVariables()
@@ -916,17 +925,18 @@ void setupRC()
 	// OpenGL States and Values
 	glClearColor(0.2, 0.2, 0.2, 1.0);
 
-	for (string model_path : model_list){
+	for (string model_path : model_list)
+	{
 		LoadTexturedModels(model_path);
 	}
 }
 
 void glPrintContextInfo(bool printExtension)
 {
-	cout << "GL_VENDOR = " << (const char*)glGetString(GL_VENDOR) << endl;
-	cout << "GL_RENDERER = " << (const char*)glGetString(GL_RENDERER) << endl;
-	cout << "GL_VERSION = " << (const char*)glGetString(GL_VERSION) << endl;
-	cout << "GL_SHADING_LANGUAGE_VERSION = " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+	cout << "GL_VENDOR = " << (const char *)glGetString(GL_VENDOR) << endl;
+	cout << "GL_RENDERER = " << (const char *)glGetString(GL_RENDERER) << endl;
+	cout << "GL_VERSION = " << (const char *)glGetString(GL_VERSION) << endl;
+	cout << "GL_SHADING_LANGUAGE_VERSION = " << (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 	if (printExtension)
 	{
 		GLint numExt;
@@ -934,76 +944,73 @@ void glPrintContextInfo(bool printExtension)
 		cout << "GL_EXTENSIONS =" << endl;
 		for (GLint i = 0; i < numExt; i++)
 		{
-			cout << "\t" << (const char*)glGetStringi(GL_EXTENSIONS, i) << endl;
+			cout << "\t" << (const char *)glGetStringi(GL_EXTENSIONS, i) << endl;
 		}
 	}
 }
 
-
 int main(int argc, char **argv)
 {
 
-    // initial glfw
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
+	// initial glfw
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 #ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // fix compilation on OS X
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // fix compilation on OS X
 #endif
 
-    
-    // create window
-	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Student ID HW3", NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    
-    
-    // load OpenGL function pointer
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
+	// create window
+	GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Student ID HW3", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+
+	// load OpenGL function pointer
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
 
 	glPrintContextInfo(false);
-    
+
 	// register glfw callback functions
-    glfwSetKeyCallback(window, KeyCallback);
+	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
-    glfwSetFramebufferSizeCallback(window, ChangeSize);
+	glfwSetFramebufferSizeCallback(window, ChangeSize);
 	glEnable(GL_DEPTH_TEST);
 	// Setup render context
 	setupRC();
 
 	// main loop
-    while (!glfwWindowShouldClose(window))
-    {
-        // render
+	while (!glfwWindowShouldClose(window))
+	{
+		// render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		// render left view
 		glViewport(0, 0, screenWidth / 2, screenHeight);
-        RenderScene(1);
+		RenderScene(1);
 		// render right view
 		glViewport(screenWidth / 2, 0, screenWidth / 2, screenHeight);
 		RenderScene(0);
-        
-        // swap buffer from back to front
-        glfwSwapBuffers(window);
-        
-        // Poll input event
-        glfwPollEvents();
-    }
-	
+
+		// swap buffer from back to front
+		glfwSwapBuffers(window);
+
+		// Poll input event
+		glfwPollEvents();
+	}
+
 	// just for compatibiliy purposes
 	return 0;
 }
