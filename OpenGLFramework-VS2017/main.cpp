@@ -187,6 +187,11 @@ GLuint iLocKd;
 GLuint iLocKs;
 GLuint iLocLightMode;
 GLuint iLocShininess;
+GLuint iLocTex; // Homework 3
+
+// Homework 3
+bool mag_filter = false;
+bool min_filter = false;
 
 static GLvoid Normalize(GLfloat v[3])
 {
@@ -376,9 +381,23 @@ void Vector3ToFloat4(Vector3 v, GLfloat res[4])
 	res[3] = 1;
 }
 
+// Homework 3
+vector<Vector2> eye_tex_offset_list{
+	Vector2(0.0f, 0.0f),
+	Vector2(0.0f, -0.25f),
+	Vector2(0.0f, -0.5f),
+	Vector2(0.0f, -0.75f),
+	Vector2(0.5f, 0.0f),
+	Vector2(0.5f, -0.25f),
+	Vector2(0.5f, -0.5f)};
+
 // Render function for display rendering
 void RenderScene(int per_vertex_or_per_pixel)
 {
+	// Homework 3
+	Vector2 eye_tex_offset;
+	Vector2 body_tex_offset = Vector2(0.0f, 0.0f);
+
 	Vector3 modelPos = models[cur_idx].position;
 
 	Matrix4 T, R, S;
@@ -427,6 +446,38 @@ void RenderScene(int per_vertex_or_per_pixel)
 
 		// [TODO] Bind texture and modify texture filtering & wrapping mode
 		// Hint: glActiveTexture, glBindTexture, glTexParameteri
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, models[cur_idx].shapes[i].material.diffuseTexture);
+		if (models[cur_idx].shapes[i].material.isEye == 1)
+		{
+			eye_tex_offset = eye_tex_offset_list[models[cur_idx].cur_eye_offset_idx];
+			glUniform2fv(iLocTex, 1, &eye_tex_offset[0]);
+		}
+		else
+		{
+			glUniform2fv(iLocTex, 1, &body_tex_offset[0]);
+		}
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		if (mag_filter)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+		else
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		}
+
+		if (min_filter)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		}
+		else
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		}
 
 		glDrawArrays(GL_TRIANGLES, 0, models[cur_idx].shapes[i].vertex_count);
 	}
@@ -510,6 +561,17 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			break;
 		case GLFW_KEY_J:
 			cur_trans_mode = ShininessEdit;
+			break;
+		case GLFW_KEY_G:
+			mag_filter = !mag_filter;
+		case GLFW_KEY_B:
+			min_filter = !min_filter;
+			break;
+		case GLFW_KEY_LEFT:
+			models[cur_idx].cur_eye_offset_idx = (models[cur_idx].cur_eye_offset_idx == 0 ? models[cur_idx].max_eye_offset : models[cur_idx].cur_eye_offset_idx) - 1;
+			break;
+		case GLFW_KEY_RIGHT:
+			models[cur_idx].cur_eye_offset_idx = (models[cur_idx].cur_eye_offset_idx == models[cur_idx].max_eye_offset - 1 ? 0 : models[cur_idx].cur_eye_offset_idx) + 1;
 			break;
 		default:
 			break;
@@ -862,6 +924,10 @@ GLuint LoadTextureImage(string image_path)
 
 		// [TODO] Bind the image to texture
 		// Hint: glGenTextures, glBindTexture, glTexImage2D, glGenerateMipmap
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// free the image from memory after binding to texture
 		stbi_image_free(data);
@@ -999,6 +1065,16 @@ void LoadTexturedModels(string model_path)
 			system("pause");
 		}
 
+		// Homework 3
+		if (string(materials[i].diffuse_texname).find("Eye") != std::string::npos)
+		{
+			material.isEye = 1;
+		}
+		else
+		{
+			material.isEye = 0;
+		}
+
 		allMaterial.push_back(material);
 	}
 
@@ -1106,6 +1182,7 @@ void setUniformVariables()
 	}
 
 	// [TODO] Get uniform location of texture
+	iLocTex = glGetUniformLocation(program, "tex_offset");
 }
 
 void setupRC()

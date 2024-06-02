@@ -47,6 +47,7 @@ vec4 lightInView;
 vec3 L, H;
 
 // [TODO] passing uniform variable for texture coordinate offset
+uniform vec2 tex_offset;
 
 void main() 
 {
@@ -116,6 +117,6 @@ void main()
 	}
 
 	// [TODO]
-	texCoord = aTexCoord;
+	texCoord = aTexCoord + tex_offset;
 	gl_Position = um4p * um4v * um4m * vec4(aPos, 1.0);
 }

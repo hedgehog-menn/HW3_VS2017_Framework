@@ -29,17 +29,19 @@ struct Light
 };
 
 uniform int cur_light_mode;
-uniform mat4 view_matrix;
+uniform mat4 um4v;
 uniform Light light[3];
 uniform PhongMaterial material;
 uniform float shininess;
 uniform int is_per_pixel_lighting;
 
 vec4 lightInView;
+vec4 fragColor_homework2;
 vec3 L, H;
 
 // [TODO] passing texture from main.cpp
 // Hint: sampler2D
+uniform sampler2D diffuseTex;
 
 void main() {
 	vec3 N = normalize(vertex_normal);
@@ -49,7 +51,7 @@ void main() {
 	// Directional light
 	if (cur_light_mode == 0)
 	{
-		lightInView = view_matrix * vec4(light[0].position, 1.0f);
+		lightInView = um4v * vec4(light[0].position, 1.0f);
 		L = normalize(lightInView.xyz + V);
 		H = normalize(L + V);
 
@@ -63,7 +65,7 @@ void main() {
 	// Point light
 	if (cur_light_mode == 1)
 	{
-		lightInView = view_matrix * vec4(light[1].position, 1.0f);
+		lightInView = um4v * vec4(light[1].position, 1.0f);
 		L = normalize(lightInView.xyz + V);
 		H = normalize(L + V);
 
@@ -83,7 +85,7 @@ void main() {
 	// Spot light
 	if (cur_light_mode == 2)
 	{
-		lightInView = view_matrix * vec4(light[2].position, 1.0f);
+		lightInView = um4v * vec4(light[2].position, 1.0f);
 		L = normalize(lightInView.xyz + V);
 		H = normalize(L + V);
 
@@ -101,9 +103,9 @@ void main() {
 		frag_color = ambient + f * (spot < light[2].spotCutoff ? 0 : pow(max(spot, 0), light[2].spotExponent)) * (diffuse + specular);
 	}
 
-	fragColor = (is_per_pixel_lighting == 0) ? vec4(vertex_color, 1.0f) : vec4(frag_color, 1.0f);
-	// fragColor = vec4(texCoord.xy, 0, 1);
+	fragColor_homework2 = (is_per_pixel_lighting == 0) ? vec4(vertex_color, 1.0f) : vec4(frag_color, 1.0f);
 
 	// [TODO] sampleing from texture
 	// Hint: texture
+	fragColor = fragColor_homework2 * vec4(texture(diffuseTex, texCoord.xy).rgb, 1);
 }
