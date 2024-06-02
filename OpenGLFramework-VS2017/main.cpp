@@ -1039,6 +1039,39 @@ void initParameter()
 	main_camera.center = Vector3(0.0f, 0.0f, 0.0f);
 	main_camera.up_vector = Vector3(0.0f, 1.0f, 0.0f);
 
+	// Homework 2
+	// Directional light
+	light[0].position = Vector3(1.0f, 1.0f, 1.0f);
+	light[0].ambient = Vector3(0.15f, 0.15f, 0.15f);
+	light[0].diffuse = Vector3(1.0f, 1.0f, 1.0f);
+	light[0].specular = Vector3(1.0f, 1.0f, 1.0f);
+	light[0].constantAttenuation = 0.0f;
+	light[0].linearAttenuation = 0.0f;
+	light[0].quadraticAttenuation = 0.0f;
+
+	// Point light
+	light[1].position = Vector3(0.0f, 2.0f, 1.0f);
+	light[1].ambient = Vector3(0.15f, 0.15f, 0.15f);
+	light[1].diffuse = Vector3(1.0f, 1.0f, 1.0f);
+	light[1].specular = Vector3(1.0f, 1.0f, 1.0f);
+	light[1].constantAttenuation = 0.01f;
+	light[1].linearAttenuation = 0.8f;
+	light[1].quadraticAttenuation = 0.1f;
+
+	// Spot light
+	light[2].position = Vector3(0.0f, 0.0f, 2.0f);
+	light[2].ambient = Vector3(0.15f, 0.15f, 0.15f);
+	light[2].diffuse = Vector3(1.0f, 1.0f, 1.0f);
+	light[2].specular = Vector3(1.0f, 1.0f, 1.0f);
+	light[2].constantAttenuation = 0.05f;
+	light[2].linearAttenuation = 0.3f;
+	light[2].quadraticAttenuation = 0.6f;
+	light[2].spotDirection = Vector3(0.0f, 0.0f, -1.0f);
+	light[2].spotExponent = 50.0f;
+	light[2].spotCutoff = degree_to_radian(30.0);
+
+	shininess = 64.0f;
+
 	setViewingMatrix();
 	setPerspective(); // set default projection matrix as perspective matrix
 }
