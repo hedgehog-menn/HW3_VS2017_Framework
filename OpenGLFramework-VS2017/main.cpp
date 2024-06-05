@@ -495,9 +495,11 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			break;
 		case GLFW_KEY_Z:
 			cur_idx = (cur_idx + 1) % model_list.size();
+			std::cout << "Model " << cur_idx + 1 << " is selected.\n";
 			break;
 		case GLFW_KEY_X:
 			cur_idx = (cur_idx - 1 + model_list.size()) % model_list.size();
+			std::cout << "Model " << cur_idx + 1 << " is selected.\n";
 			break;
 		case GLFW_KEY_O:
 			if (cur_proj_mode == Perspective)
@@ -534,7 +536,18 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			cur_trans_mode = ViewUp;
 			break;
 		case GLFW_KEY_I:
-			cout << endl;
+			std::cout << "\n----------------------------------------------\n";
+			std::cout << "Translation Matrix:\n"
+					  << translate(models[cur_idx].position) << "\n";
+			std::cout << "Rotation Matrix:\n"
+					  << rotate(models[cur_idx].rotation) << "\n";
+			std::cout << "Scaling Matrix:\n"
+					  << scaling(models[cur_idx].scale) << "\n";
+			std::cout << "Viewing Matrix:\n"
+					  << view_matrix << "\n";
+			std::cout << "Projection Matrix:\n"
+					  << project_matrix << "\n";
+			std::cout << "----------------------------------------------\n\n";
 			break;
 		case GLFW_KEY_L:
 			// Change Light Mode
@@ -1199,6 +1212,10 @@ void setupRC()
 	{
 		LoadTexturedModels(model_path);
 	}
+
+	// My extra from HW1-2
+	std::cout << "Model " << cur_idx + 1 << " is selected.\n";
+	std::cout << "Light mode: " << "Directional light\n";
 }
 
 void glPrintContextInfo(bool printExtension)
